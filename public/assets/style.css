@@ -1,0 +1,203 @@
+/* Tapmaan — heat intelligence platform.
+   The thermal ramp is the identity: severity is carried by colour everywhere,
+   and never by colour alone. */
+
+:root {
+  --paper:      #ECEAE4;
+  --surface:    #F6F4F0;
+  --line:       #DAD4CA;
+  --ink:        #241C17;
+  --ink-soft:   #63584F;
+
+  --normal:   #4E8C6A;
+  --watch:    #D9A21B;
+  --heatwave: #DB6B24;
+  --severe:   #B5341F;
+  --extreme:  #74190F;
+
+  --relief:   #2F5561;
+
+  --w: 76rem;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Barlow", system-ui, -apple-system, sans-serif;
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, .nav a, .stat-value, .btn, th, .tab {
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+  font-weight: 600;
+}
+
+h1 { font-size: clamp(2.1rem, 5vw, 3.2rem); line-height: 1.05; margin: 0 0 .5rem; }
+h2 { font-size: 1.75rem; margin: 0 0 .7rem; line-height: 1.15; }
+h3 { font-size: 1.2rem; margin: 0 0 .3rem; }
+p  { max-width: 68ch; margin: 0 0 1rem; }
+a  { color: var(--relief); }
+
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 1.25rem; }
+section { padding: 2.5rem 0; }
+section + section { border-top: 1px solid var(--line); }
+.lede { font-size: 1.1rem; color: var(--ink-soft); }
+.muted { color: var(--ink-soft); font-size: .92rem; }
+
+/* ---------- masthead ---------- */
+
+.ramp {
+  height: 5px;
+  background: linear-gradient(90deg, var(--normal), var(--watch) 32%,
+              var(--heatwave) 58%, var(--severe) 80%, var(--extreme));
+}
+
+.masthead { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 30; }
+.masthead-inner {
+  max-width: var(--w); margin: 0 auto; padding: .8rem 1.25rem;
+  display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; flex-wrap: wrap;
+}
+.brand { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 1.4rem; text-decoration: none; color: var(--ink); }
+.brand span { color: var(--severe); }
+.brand small { display: block; font-family: "Barlow", sans-serif; font-weight: 400; font-size: .72rem; color: var(--ink-soft); letter-spacing: .02em; }
+
+.nav { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+.nav a { text-decoration: none; color: var(--ink-soft); font-size: 1.05rem; border-bottom: 2px solid transparent; padding-bottom: 2px; }
+.nav a:hover { color: var(--ink); border-bottom-color: var(--heatwave); }
+.nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--severe); }
+
+/* ---------- severity ---------- */
+
+.sev {
+  display: inline-block; padding: .1rem .6rem; border-radius: 2px;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: .95rem;
+  color: #fff; white-space: nowrap;
+}
+.sev-normal   { background: var(--normal); }
+.sev-watch    { background: var(--watch); color: var(--ink); }
+.sev-heatwave { background: var(--heatwave); }
+.sev-severe   { background: var(--severe); }
+
+/* ---------- stat strip ---------- */
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+.stat { border-left: 3px solid var(--line); padding-left: .85rem; }
+.stat-value { font-size: 2.1rem; line-height: 1.05; }
+.stat-label { color: var(--ink-soft); font-size: .9rem; }
+
+/* ---------- controls ---------- */
+
+.controls { display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1.25rem; }
+.field { display: flex; flex-direction: column; gap: .25rem; }
+.field label { font-size: .85rem; color: var(--ink-soft); }
+.field select, .field input {
+  font: inherit; padding: .5rem .6rem; border: 1px solid var(--ink-soft);
+  border-radius: 2px; background: #fff; color: var(--ink); min-width: 11rem;
+}
+
+.btn {
+  font-family: "Barlow Condensed", sans-serif; font-size: 1.05rem; cursor: pointer;
+  background: var(--severe); color: #fff; border: none; border-radius: 2px; padding: .55rem 1.3rem;
+}
+.btn:hover { background: var(--extreme); }
+.btn.ghost { background: transparent; color: var(--relief); border: 1px solid var(--relief); }
+.btn.ghost:hover { background: var(--relief); color: #fff; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+:focus-visible { outline: 3px solid var(--relief); outline-offset: 2px; }
+
+/* ---------- table ---------- */
+
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: .5rem 0 1rem; font-size: .95rem; }
+th, td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--ink-soft); font-size: 1rem; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:hover { background: var(--surface); }
+
+/* ---------- forecast strip ---------- */
+
+.days { display: grid; gap: .1rem; margin: 1rem 0; }
+.day {
+  display: grid; grid-template-columns: 6.5rem 1fr 4.5rem 6.5rem;
+  align-items: center; gap: .75rem; padding: .45rem 0; border-bottom: 1px solid var(--line);
+}
+.day-date { font-family: "Barlow Condensed", sans-serif; font-weight: 600; }
+.day-track { background: var(--surface); height: 22px; border-radius: 2px; overflow: hidden; }
+.day-fill { height: 100%; border-radius: 2px; }
+.day-temp { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.day-prob { text-align: right; color: var(--ink-soft); font-size: .88rem; font-variant-numeric: tabular-nums; }
+
+/* ---------- map ---------- */
+
+.map {
+  position: relative; width: 100%; aspect-ratio: 1 / 1.05; max-width: 34rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 2px;
+}
+.map-dot {
+  position: absolute; width: 13px; height: 13px; border-radius: 50%;
+  transform: translate(-50%, -50%); border: 1.5px solid rgba(255,255,255,.85); cursor: pointer;
+}
+.map-dot:hover { width: 19px; height: 19px; z-index: 5; }
+.map-caption { color: var(--ink-soft); font-size: .85rem; margin-top: .5rem; }
+
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; margin: .75rem 0; font-size: .88rem; }
+.legend span { display: flex; align-items: center; gap: .35rem; }
+.legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+/* ---------- cards ---------- */
+
+.grid { display: grid; gap: 1.5rem; }
+.grid.two   { grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 2px; padding: 1.1rem 1.2rem; }
+.card.flag-severe   { border-left: 3px solid var(--severe); }
+.card.flag-heatwave { border-left: 3px solid var(--heatwave); }
+.card.flag-watch    { border-left: 3px solid var(--watch); }
+.card.flag-normal   { border-left: 3px solid var(--normal); }
+
+.card ul { padding-left: 1.1rem; margin: .5rem 0 0; }
+.card li { margin-bottom: .35rem; }
+
+/* ---------- advisory output ---------- */
+
+.advisory-out { border-top: 3px solid var(--severe); background: var(--surface); padding: 1.25rem; margin-top: 1.25rem; }
+.advisory-out h3 { font-size: 1.35rem; }
+.advisory-meta { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .85rem; color: var(--ink-soft); margin-bottom: .75rem; }
+
+/* ---------- states ---------- */
+
+.state { padding: 1.5rem 0; color: var(--ink-soft); }
+.state.error { color: var(--severe); }
+.skeleton { background: linear-gradient(90deg, var(--line), var(--surface), var(--line)); height: 1rem; border-radius: 2px; }
+
+.notice { border-left: 3px solid var(--normal); background: rgba(78,140,106,.1); padding: .8rem 1rem; margin-top: 1rem; }
+.notice.warn { border-left-color: var(--severe); background: rgba(181,52,31,.09); }
+[hidden] { display: none !important; }
+
+footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--ink-soft); font-size: .9rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 40rem) {
+  .day { grid-template-columns: 5rem 1fr 4rem; }
+  .day-prob { display: none; }
+}
+
+/* ---------- scenario bar ---------- */
+
+.scenario-bar {
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  font-size: .88rem; color: var(--ink-soft);
+  display: flex; gap: .75rem; align-items: center; flex-wrap: wrap;
+  max-width: var(--w); margin: 0 auto; padding: .45rem 1.25rem;
+}
+.scenario-bar.is-on { background: rgba(219,107,36,.12); color: var(--ink); border-bottom-color: var(--heatwave); }
+.linkish {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--relief); font: inherit; text-decoration: underline;
+}

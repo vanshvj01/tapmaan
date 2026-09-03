@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advisory — Tapmaan</title>
+<meta name="description" content="Stakeholder-specific heat advisory generation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="advisory">
+
+<header class="masthead">
+  <div class="ramp"></div>
+  <div class="masthead-inner">
+    <a class="brand" href="/">Tapmaan<span>.</span>
+      <small>Heatwave monitoring, prediction and early warning</small></a>
+    <nav class="nav">
+      <a href="/">Monitor</a>
+      <a href="/forecast.html">Forecast</a>
+      <a href="/hotspots.html">Hotspots</a>
+      <a href="/advisory.html" aria-current="page">Advisory</a>
+      <a href="/alerts.html">Alerts</a>
+      <a href="/about.html">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h1>Advisory generation</h1>
+    <p class="lede">The same forecast means different things to a farmer, a hospital and a
+       ward officer. This turns the technical output into an advisory written for one
+       audience, in one language.</p>
+
+    <div class="controls">
+      <div class="field">
+        <label for="ad-station">Station</label>
+        <select id="ad-station"></select>
+      </div>
+      <div class="field">
+        <label for="ad-audience">Audience</label>
+        <select id="ad-audience">
+          <option value="citizens">Citizens</option>
+          <option value="workers">Outdoor workers</option>
+          <option value="farmers">Farmers</option>
+          <option value="health">Health agencies</option>
+          <option value="authorities">Local authorities</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ad-language">Language</label>
+        <select id="ad-language">
+          <option value="english">English</option>
+          <option value="hindi">Hindi</option>
+          <option value="marathi">Marathi</option>
+        </select>
+      </div>
+      <button class="btn" id="ad-generate">Generate advisory</button>
+    </div>
+
+    <div class="state" id="ad-state"></div>
+
+    <div class="advisory-out" id="ad-out" hidden>
+      <div class="advisory-meta" id="ad-meta"></div>
+      <h3 id="ad-headline"></h3>
+      <p id="ad-body"></p>
+      <ul id="ad-actions"></ul>
+      <p class="notice warn" id="ad-approval" hidden>Severe warning. Held for meteorologist
+         review and approval before it can be disseminated.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Keeping generated text factual</h2>
+    <p>Where a language model drafts the advisory, it is given only the verified forecast
+       figures and instructed to use no others. Any severe warning is flagged for expert
+       approval before dissemination rather than released automatically. If the model is
+       unreachable, a rule-based draft is produced instead, so the warning still goes out.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Tapmaan is a student project built for use case KJS-CES-01, Climate Intelligence for
+       Heatwave Monitoring, Prediction and Early Warning. Classification follows India
+       Meteorological Department heatwave criteria. This is not an official warning service —
+       for operational decisions, follow IMD.</p>
+    <p>K. J. Somaiya School of Engineering · Information Technology</p>
+  </div>
+</footer>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

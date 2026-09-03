@@ -1,0 +1,11 @@
+{
+  "name": "tapmaan",
+  "version": "1.0.0",
+  "description": "Climate intelligence for heatwave monitoring, prediction and early warning",
+  "private": true,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "node test/logic.test.js"
+  }
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alerts — Tapmaan</title>
+<meta name="description" content="Active heat warnings and alert subscription.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="alerts">
+
+<header class="masthead">
+  <div class="ramp"></div>
+  <div class="masthead-inner">
+    <a class="brand" href="/">Tapmaan<span>.</span>
+      <small>Heatwave monitoring, prediction and early warning</small></a>
+    <nav class="nav">
+      <a href="/">Monitor</a>
+      <a href="/forecast.html">Forecast</a>
+      <a href="/hotspots.html">Hotspots</a>
+      <a href="/advisory.html">Advisory</a>
+      <a href="/alerts.html" aria-current="page">Alerts</a>
+      <a href="/about.html">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h1>Early warning</h1>
+    <p class="lede">Every station currently meeting or forecast to meet heatwave criteria,
+       with the lead time available before onset.</p>
+
+    <div class="stats" id="al-stats"></div>
+    <div class="state" id="al-state"></div>
+    <div class="grid two" id="al-list"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Subscribe to warnings</h2>
+    <p>One message before a heat day, in your language. Nothing on ordinary days.</p>
+
+    <div class="controls">
+      <div class="field">
+        <label for="sub-station">District</label>
+        <select id="sub-station"></select>
+      </div>
+      <div class="field">
+        <label for="sub-channel">Channel</label>
+        <select id="sub-channel">
+          <option value="sms">SMS</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="email">Email</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sub-language">Language</label>
+        <select id="sub-language">
+          <option value="english">English</option>
+          <option value="hindi">Hindi</option>
+          <option value="marathi">Marathi</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sub-contact">Mobile number or email</label>
+        <input id="sub-contact" type="text" placeholder="9876543210">
+      </div>
+      <button class="btn" id="sub-submit">Subscribe</button>
+    </div>
+
+    <p class="notice" id="sub-result" hidden></p>
+    <p class="muted">Contact details are masked before storage and are not retained beyond
+       the demonstration session.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Tapmaan is a student project built for use case KJS-CES-01, Climate Intelligence for
+       Heatwave Monitoring, Prediction and Early Warning. Classification follows India
+       Meteorological Department heatwave criteria. This is not an official warning service —
+       for operational decisions, follow IMD.</p>
+    <p>K. J. Somaiya School of Engineering · Information Technology</p>
+  </div>
+</footer>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

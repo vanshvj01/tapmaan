@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor — Tapmaan</title>
+<meta name="description" content="Live heatwave monitoring across the Indian station network.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="dashboard">
+
+<header class="masthead">
+  <div class="ramp"></div>
+  <div class="masthead-inner">
+    <a class="brand" href="/">Tapmaan<span>.</span>
+      <small>Heatwave monitoring, prediction and early warning</small></a>
+    <nav class="nav">
+      <a href="/" aria-current="page">Monitor</a>
+      <a href="/forecast.html">Forecast</a>
+      <a href="/hotspots.html">Hotspots</a>
+      <a href="/advisory.html">Advisory</a>
+      <a href="/alerts.html">Alerts</a>
+      <a href="/about.html">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h1>Heatwave monitoring</h1>
+    <p class="lede">Twenty-five stations across seven IMD regions, classified against
+       official heatwave criteria. Departure from the local normal decides the warning,
+       not the raw temperature.</p>
+
+    <div class="stats" id="dash-stats"></div>
+    <div class="state" id="dash-state"></div>
+
+    <div class="grid two">
+      <div>
+        <div class="map" id="dash-map"></div>
+        <p class="map-caption">Station positions by latitude and longitude. Select a station to open its forecast.</p>
+      </div>
+      <div>
+        <h2>Reading the classification</h2>
+        <p>IMD does not declare a heatwave on a single number. A station qualifies once its
+           maximum passes a base threshold — 40&deg;C in the plains, 37&deg;C on the coast,
+           30&deg;C in the hills — and then the departure from that station's own normal
+           decides severity.</p>
+        <div class="legend">
+          <span><i style="background:var(--normal)"></i> Normal</span>
+          <span><i style="background:var(--watch)"></i> Heat watch, departure 3.0 to 4.4&deg;C</span>
+          <span><i style="background:var(--heatwave)"></i> Heatwave, departure 4.5 to 6.4&deg;C</span>
+          <span><i style="background:var(--severe)"></i> Severe, departure 6.5&deg;C or more</span>
+        </div>
+        <p class="muted">An absolute maximum of 45&deg;C triggers a heatwave and 47&deg;C a severe
+           heatwave, whatever the departure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Station network</h2>
+    <div class="controls">
+      <div class="field">
+        <label for="dash-region">Filter by region</label>
+        <select id="dash-region"><option value="">All regions</option></select>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Station</th><th>Region</th><th class="num">Max</th><th class="num">Normal</th>
+          <th class="num">Departure</th><th class="num">Feels like</th><th class="num">Night min</th><th>Classification</th>
+        </tr></thead>
+        <tbody id="dash-rows"></tbody>
+      </table>
+    </div>
+    <p class="muted" id="dash-source"></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Tapmaan is a student project built for use case KJS-CES-01, Climate Intelligence for
+       Heatwave Monitoring, Prediction and Early Warning. Classification follows India
+       Meteorological Department heatwave criteria. This is not an official warning service —
+       for operational decisions, follow IMD.</p>
+    <p>K. J. Somaiya School of Engineering · Information Technology</p>
+  </div>
+</footer>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

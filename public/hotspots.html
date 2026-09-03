@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotspots — Tapmaan</title>
+<meta name="description" content="Heatwave hotspot identification and region-wise analysis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="hotspots">
+
+<header class="masthead">
+  <div class="ramp"></div>
+  <div class="masthead-inner">
+    <a class="brand" href="/">Tapmaan<span>.</span>
+      <small>Heatwave monitoring, prediction and early warning</small></a>
+    <nav class="nav">
+      <a href="/">Monitor</a>
+      <a href="/forecast.html">Forecast</a>
+      <a href="/hotspots.html" aria-current="page">Hotspots</a>
+      <a href="/advisory.html">Advisory</a>
+      <a href="/alerts.html">Alerts</a>
+      <a href="/about.html">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h1>Hotspot identification</h1>
+    <p class="lede">A hotspot is not the hottest place. The score combines departure from
+       local normal, how long the spell persists, and whether night temperatures fall far
+       enough for the body to recover — which is what drives heat mortality.</p>
+
+    <div class="state" id="hs-state"></div>
+
+    <div class="grid two">
+      <div>
+        <div class="map" id="hs-map"></div>
+        <p class="map-caption">Every monitored station, coloured by current classification.</p>
+      </div>
+      <div>
+        <h2>How the score is built</h2>
+        <p>Four components, capped at 100. Departure above the local normal carries the most
+           weight, then persistence of the spell, then the night-time minimum above 26&deg;C,
+           then the humidity contribution to apparent temperature.</p>
+        <p class="muted">Night-time minima matter disproportionately. A city that cools to
+           22&deg;C after a 44&deg;C day is far less dangerous than one that stays at 30&deg;C
+           after 41&deg;C, because the second gives no overnight recovery.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Ranked hotspots</h2>
+    <div class="grid three" id="hs-cards"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Region-wise analysis</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Region</th><th class="num">Stations</th><th class="num">Under warning</th>
+          <th class="num">Mean max</th><th class="num">Mean departure</th><th>Worst station</th><th>Peak class</th>
+        </tr></thead>
+        <tbody id="hs-regions"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Tapmaan is a student project built for use case KJS-CES-01, Climate Intelligence for
+       Heatwave Monitoring, Prediction and Early Warning. Classification follows India
+       Meteorological Department heatwave criteria. This is not an official warning service —
+       for operational decisions, follow IMD.</p>
+    <p>K. J. Somaiya School of Engineering · Information Technology</p>
+  </div>
+</footer>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

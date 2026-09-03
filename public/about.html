@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method — Tapmaan</title>
+<meta name="description" content="Data sources, criteria and architecture behind Tapmaan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="about">
+
+<header class="masthead">
+  <div class="ramp"></div>
+  <div class="masthead-inner">
+    <a class="brand" href="/">Tapmaan<span>.</span>
+      <small>Heatwave monitoring, prediction and early warning</small></a>
+    <nav class="nav">
+      <a href="/">Monitor</a>
+      <a href="/forecast.html">Forecast</a>
+      <a href="/hotspots.html">Hotspots</a>
+      <a href="/advisory.html">Advisory</a>
+      <a href="/alerts.html">Alerts</a>
+      <a href="/about.html" aria-current="page">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h1>Method and data</h1>
+    <p class="lede">Every number on this platform traces to a source and a stated criterion.</p>
+
+    <h2>Data sources</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Source</th><th>Provides</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>IMD, Pune</td><td>Historical maximum temperature, GRD files, official declarations</td><td>Training data and ground truth</td></tr>
+          <tr><td>Open-Meteo</td><td>Live observations and short-range forecast</td><td>Real-time feed used by this deployment</td></tr>
+          <tr><td>IoT AWS network</td><td>Localised ground observations</td><td>Forecast validation, planned</td></tr>
+          <tr><td>Station normals</td><td>Long-period average maximum per station</td><td>Departure calculation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Heatwave criteria</h2>
+    <p>A station qualifies once its maximum passes the base threshold for its terrain:
+       40&deg;C in the plains, 37&deg;C on the coast, 30&deg;C in the hills. Severity then
+       follows the departure from that station's own normal — 4.5 to 6.4&deg;C is a heatwave,
+       6.5&deg;C or above is severe. An absolute maximum of 45&deg;C or 47&deg;C triggers the
+       respective class regardless of departure.</p>
+
+    <h2>Apparent temperature</h2>
+    <p>The feels-like figure uses the Rothfusz regression over temperature and relative
+       humidity, with the standard low-humidity and high-humidity adjustments. It explains
+       why a humid coastal 36&deg;C can be more dangerous than a dry inland 42&deg;C.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Architecture</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>Data acquisition</h3>
+        <p class="muted">A provider module fetches and caches upstream observations, with a
+           deterministic fallback series so the platform degrades instead of breaking. Swapping
+           in the IMD GRD pipeline changes nothing downstream.</p>
+      </div>
+      <div class="card">
+        <h3>Analytics and prediction</h3>
+        <p class="muted">Classification, apparent temperature, hotspot scoring and heatwave
+           probability run server-side over the fetched series and are exposed as JSON.</p>
+      </div>
+      <div class="card">
+        <h3>Decision support</h3>
+        <p class="muted">Monitoring tables, the forecast strip, the hotspot map and the region
+           analysis are all views over the same API.</p>
+      </div>
+      <div class="card">
+        <h3>Advisory and dissemination</h3>
+        <p class="muted">Stakeholder-specific advisory generation with a factual-grounding
+           prompt, a rule-based fallback, and an approval gate on severe warnings.</p>
+      </div>
+    </div>
+
+    <h2>API</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Endpoint</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><a href="/api/observations">/api/observations</a></td><td>Current conditions, classified, for the whole network</td></tr>
+          <tr><td><a href="/api/forecast?station=nagpur">/api/forecast</a></td><td>Seven-day prediction with probability and lead time</td></tr>
+          <tr><td><a href="/api/hotspots">/api/hotspots</a></td><td>Hotspot scores and region-wise aggregation</td></tr>
+          <tr><td><a href="/api/advisory?station=nagpur&amp;audience=farmers">/api/advisory</a></td><td>Stakeholder-specific advisory text</td></tr>
+          <tr><td><a href="/api/alerts">/api/alerts</a></td><td>Active warning dispatch queue</td></tr>
+          <tr><td>/api/subscribe</td><td>POST to register for warnings</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Tapmaan is a student project built for use case KJS-CES-01, Climate Intelligence for
+       Heatwave Monitoring, Prediction and Early Warning. Classification follows India
+       Meteorological Department heatwave criteria. This is not an official warning service —
+       for operational decisions, follow IMD.</p>
+    <p>K. J. Somaiya School of Engineering · Information Technology</p>
+  </div>
+</footer>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>
