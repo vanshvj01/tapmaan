@@ -3,8 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hotspots — Tapmaan</title>
-<meta name="description" content="Heatwave hotspot identification and region-wise analysis.">
+<title>Heatwave Hotspots in India: Region-wise Heat Risk | Tapmaan</title>
+<meta name="description" content="Find heatwave hotspots across India. Stations are scored on heat, night temperature and departure, with region-wise heat risk analysis.">
+<meta name="keywords" content="heatwave hotspots, heat risk india, region-wise heatwave, urban heat, night temperature, Tapmaan">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tapmaan-plum.vercel.app/hotspots.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tapmaan">
+<meta property="og:title" content="Heatwave Hotspots in India: Region-wise Heat Risk | Tapmaan">
+<meta property="og:description" content="Find heatwave hotspots across India. Stations are scored on heat, night temperature and departure, with region-wise heat risk analysis.">
+<meta property="og:url" content="https://tapmaan-plum.vercel.app/hotspots.html">
+<meta property="og:image" content="https://tapmaan-plum.vercel.app/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-29LXJH5G9F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-29LXJH5G9F');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
@@ -15,15 +36,15 @@
 <header class="masthead">
   <div class="ramp"></div>
   <div class="masthead-inner">
-    <a class="brand" href="/">Tapmaan<span>.</span>
+    <a class="brand" href="/" title="Tapmaan home: heatwave monitoring, prediction and early warning">Tapmaan<span>.</span>
       <small>Heatwave monitoring, prediction and early warning</small></a>
     <nav class="nav">
-      <a href="/">Monitor</a>
-      <a href="/forecast.html">Forecast</a>
-      <a href="/hotspots.html" aria-current="page">Hotspots</a>
-      <a href="/advisory.html">Advisory</a>
-      <a href="/alerts.html">Alerts</a>
-      <a href="/about.html">Method</a>
+      <a href="/" title="Live heatwave monitoring dashboard">Monitor</a>
+      <a href="/forecast.html" title="Seven-day heatwave forecast by station">Forecast</a>
+      <a href="/hotspots.html" title="Heatwave hotspots and region-wise analysis" aria-current="page">Hotspots</a>
+      <a href="/advisory.html" title="Generate a heatwave advisory">Advisory</a>
+      <a href="/alerts.html" title="Active heatwave alerts and subscription">Alerts</a>
+      <a href="/about.html" title="Method, data sources and IMD criteria">Method</a>
     </nav>
   </div>
 </header>
@@ -32,7 +53,7 @@
 
 <section>
   <div class="wrap">
-    <h1>Hotspot identification</h1>
+    <h1>Heatwave hotspot identification</h1>
     <p class="lede">A hotspot is not the hottest place. The score combines departure from
        local normal, how long the spell persists, and whether night temperatures fall far
        enough for the body to recover — which is what drives heat mortality.</p>

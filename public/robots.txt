@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://tapmaan-plum.vercel.app/sitemap.xml

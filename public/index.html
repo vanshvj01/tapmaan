@@ -3,8 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Monitor — Tapmaan</title>
-<meta name="description" content="Live heatwave monitoring across the Indian station network.">
+<title>Heatwave Monitoring India: Live IMD Heat Alerts | Tapmaan</title>
+<meta name="description" content="Live heatwave monitoring for 25 Indian stations. Temperatures classified against IMD heatwave criteria, with heat index, departures and alert levels.">
+<meta name="keywords" content="heatwave monitoring, heatwave India, IMD heatwave criteria, heat wave alert, heat index India, temperature departure, Tapmaan">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tapmaan-plum.vercel.app/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tapmaan">
+<meta property="og:title" content="Heatwave Monitoring India: Live IMD Heat Alerts | Tapmaan">
+<meta property="og:description" content="Live heatwave monitoring for 25 Indian stations. Temperatures classified against IMD heatwave criteria, with heat index, departures and alert levels.">
+<meta property="og:url" content="https://tapmaan-plum.vercel.app/">
+<meta property="og:image" content="https://tapmaan-plum.vercel.app/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-29LXJH5G9F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-29LXJH5G9F');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
@@ -15,15 +36,15 @@
 <header class="masthead">
   <div class="ramp"></div>
   <div class="masthead-inner">
-    <a class="brand" href="/">Tapmaan<span>.</span>
+    <a class="brand" href="/" title="Tapmaan home: heatwave monitoring, prediction and early warning">Tapmaan<span>.</span>
       <small>Heatwave monitoring, prediction and early warning</small></a>
     <nav class="nav">
-      <a href="/" aria-current="page">Monitor</a>
-      <a href="/forecast.html">Forecast</a>
-      <a href="/hotspots.html">Hotspots</a>
-      <a href="/advisory.html">Advisory</a>
-      <a href="/alerts.html">Alerts</a>
-      <a href="/about.html">Method</a>
+      <a href="/" title="Live heatwave monitoring dashboard" aria-current="page">Monitor</a>
+      <a href="/forecast.html" title="Seven-day heatwave forecast by station">Forecast</a>
+      <a href="/hotspots.html" title="Heatwave hotspots and region-wise analysis">Hotspots</a>
+      <a href="/advisory.html" title="Generate a heatwave advisory">Advisory</a>
+      <a href="/alerts.html" title="Active heatwave alerts and subscription">Alerts</a>
+      <a href="/about.html" title="Method, data sources and IMD criteria">Method</a>
     </nav>
   </div>
 </header>
@@ -32,7 +53,7 @@
 
 <section>
   <div class="wrap">
-    <h1>Heatwave monitoring</h1>
+    <h1>Live heatwave monitoring across India</h1>
     <p class="lede">Twenty-five stations across seven IMD regions, classified against
        official heatwave criteria. Departure from the local normal decides the warning,
        not the raw temperature.</p>
@@ -83,6 +104,31 @@
       </table>
     </div>
     <p class="muted" id="dash-source"></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Why heatwave monitoring matters</h2>
+    <figure class="figure">
+      <img src="/assets/heatwave-scale.svg" width="720" height="160"
+           alt="IMD heatwave classification scale from normal through heat watch, heatwave and severe heatwave by departure from normal">
+      <figcaption class="muted">Severity scale used by Tapmaan, following IMD departure-from-normal criteria.</figcaption>
+    </figure>
+    <p>Heatwaves are among the deadliest weather hazards in India. Long spells of extreme heat
+       raise the risk of heat stroke, dehydration and crop loss, and hot nights stop the body
+       from recovering. Outdoor workers, farmers, older people and young children are affected first.</p>
+    <p>Tapmaan tracks maximum temperature, night minimum and heat index at twenty-five stations,
+       and compares each reading with that station's own normal. This is how the India
+       Meteorological Department declares a heatwave, so the same reading of 41&deg;C can mean
+       a warning in one city and an ordinary summer day in another.</p>
+    <p>Use the <a href="/forecast.html" title="Seven-day heatwave forecast by station">seven-day heatwave forecast</a>
+       to see what is coming, check the <a href="/hotspots.html" title="Heatwave hotspots and region-wise analysis">heatwave hotspots</a>
+       for regions under the most stress, and <a href="/alerts.html" title="Subscribe to heatwave alerts">subscribe to heatwave alerts</a>
+       for your city. Official warnings are issued by
+       <a href="https://mausam.imd.gov.in/" title="India Meteorological Department official website" target="_blank" rel="noopener">IMD</a>,
+       and the national heat action guidelines are published by
+       <a href="https://ndma.gov.in/Natural-Hazards/Heat-Wave" title="NDMA heat wave guidelines" target="_blank" rel="noopener">NDMA</a>.</p>
   </div>
 </section>
 

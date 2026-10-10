@@ -3,8 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forecast — Tapmaan</title>
-<meta name="description" content="Seven-day heatwave prediction with probability and lead time.">
+<title>7-Day Heatwave Forecast for Indian Cities | Tapmaan</title>
+<meta name="description" content="Seven-day heatwave forecast for Indian cities with daily probability, lead time to onset and IMD-based severity for each station.">
+<meta name="keywords" content="heatwave forecast, india heatwave forecast cities, 7 day heatwave forecast, heatwave prediction, IMD heat wave, Tapmaan">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tapmaan-plum.vercel.app/forecast.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tapmaan">
+<meta property="og:title" content="7-Day Heatwave Forecast for Indian Cities | Tapmaan">
+<meta property="og:description" content="Seven-day heatwave forecast for Indian cities with daily probability, lead time to onset and IMD-based severity for each station.">
+<meta property="og:url" content="https://tapmaan-plum.vercel.app/forecast.html">
+<meta property="og:image" content="https://tapmaan-plum.vercel.app/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-29LXJH5G9F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-29LXJH5G9F');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
@@ -15,15 +36,15 @@
 <header class="masthead">
   <div class="ramp"></div>
   <div class="masthead-inner">
-    <a class="brand" href="/">Tapmaan<span>.</span>
+    <a class="brand" href="/" title="Tapmaan home: heatwave monitoring, prediction and early warning">Tapmaan<span>.</span>
       <small>Heatwave monitoring, prediction and early warning</small></a>
     <nav class="nav">
-      <a href="/">Monitor</a>
-      <a href="/forecast.html" aria-current="page">Forecast</a>
-      <a href="/hotspots.html">Hotspots</a>
-      <a href="/advisory.html">Advisory</a>
-      <a href="/alerts.html">Alerts</a>
-      <a href="/about.html">Method</a>
+      <a href="/" title="Live heatwave monitoring dashboard">Monitor</a>
+      <a href="/forecast.html" title="Seven-day heatwave forecast by station" aria-current="page">Forecast</a>
+      <a href="/hotspots.html" title="Heatwave hotspots and region-wise analysis">Hotspots</a>
+      <a href="/advisory.html" title="Generate a heatwave advisory">Advisory</a>
+      <a href="/alerts.html" title="Active heatwave alerts and subscription">Alerts</a>
+      <a href="/about.html" title="Method, data sources and IMD criteria">Method</a>
     </nav>
   </div>
 </header>
@@ -32,7 +53,7 @@
 
 <section>
   <div class="wrap">
-    <h1>Seven-day prediction</h1>
+    <h1>Seven-day heatwave forecast for Indian cities</h1>
     <p class="lede">Forecast maximum temperature classified day by day, with the probability
        that each day meets heatwave criteria. Probability widens with lead time because
        forecast skill falls away.</p>
