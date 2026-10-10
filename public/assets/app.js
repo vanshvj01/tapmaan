@@ -56,7 +56,7 @@ const api = {
   async get(path) {
     const res = await fetch(scenario.param(path));
     const json = await res.json().catch(() => ({ ok: false, error: 'Bad response from the server.' }));
-    if (!res.ok || !json.ok) throw new Error(json.error || 'Request failed.');
+    if (!res.ok || !json.ok) { track('api_error', { endpoint: path.split('?')[0] }); throw new Error(json.error || 'Request failed.'); }
     return json;
   },
   async post(path, body) {
@@ -70,6 +70,13 @@ const api = {
     return json;
   }
 };
+
+
+/* Google Analytics 4 custom events. gtag is loaded by the Google tag in each
+   page's <head>; if it is blocked (ad blocker), tracking silently does nothing. */
+function track(name, params) {
+  if (typeof window.gtag === 'function') window.gtag('event', name, params || {});
+}
 
 function el(id) { return document.getElementById(id); }
 
@@ -135,13 +142,17 @@ async function initDashboard() {
         <div class="stat-label">Current season</div></div>`;
 
     plotMap(el('dash-map'), data.observations, s => {
+      track('station_selected', { station_selected: s.id, method: 'map' });
       window.location.href = scenario.param('/forecast.html?station=' + s.id);
     });
 
     const filter = el('dash-region');
     if (filter && filter.options.length <= 1) {
       data.regions.forEach(r => filter.add(new Option(r, r)));
-      filter.onchange = () => renderRows(data.observations, filter.value);
+      filter.onchange = () => {
+        renderRows(data.observations, filter.value);
+        track('region_filtered', { region: filter.value || 'all' });
+      };
     }
     renderRows(data.observations, '');
 
@@ -187,7 +198,10 @@ async function initForecast() {
     return;
   }
 
-  select.onchange = () => loadForecast(select.value);
+  select.onchange = () => {
+    track('station_selected', { station_selected: select.value, method: 'dropdown' });
+    loadForecast(select.value);
+  };
   loadForecast(select.value);
 }
 
@@ -236,6 +250,7 @@ async function loadForecast(stationId) {
       <td class="muted" style="white-space:normal">${d.criterion}</td></tr>`).join('');
 
     el('fc-advisory-link').href = scenario.param('/advisory.html?station=' + stationId);
+    track('forecast_viewed', { station_selected: stationId, alert_level: o.eventDays > 0 ? 'heatwave' : 'normal' });
   } catch (err) {
     setState('fc-state', err.message, true);
   }
@@ -322,6 +337,7 @@ async function generateAdvisory() {
     el('ad-actions').innerHTML = a.actions.map(x => `<li>${x}</li>`).join('');
 
     el('ad-approval').hidden = !data.requiresHumanApproval;
+    track('advisory_generated', { station_selected: data.station.name, audience: data.audience, language: data.language, alert_level: data.severity });
   } catch (err) {
     setState('ad-state', err.message, true);
   } finally {
@@ -390,10 +406,12 @@ async function submitSubscription() {
     out.className = 'notice';
     out.textContent = data.message;
     el('sub-contact').value = '';
+    track('alert_subscribe', { station_selected: el('sub-station').value, method: el('sub-channel').value, language: el('sub-language').value });
   } catch (err) {
     out.hidden = false;
     out.className = 'notice warn';
     out.textContent = err.message;
+    track('subscribe_failed', { method: el('sub-channel').value });
   } finally {
     btn.disabled = false;
   }

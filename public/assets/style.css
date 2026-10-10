@@ -201,3 +201,8 @@ footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--i
   background: none; border: none; padding: 0; cursor: pointer;
   color: var(--relief); font: inherit; text-decoration: underline;
 }
+
+/* figure used on the home page (SEO: image with descriptive alt text) */
+.figure { margin: 0 0 1.2rem; }
+.figure img { display: block; width: 100%; max-width: 720px; height: auto; }
+.figure figcaption { font-size: .9rem; margin-top: .3rem; }

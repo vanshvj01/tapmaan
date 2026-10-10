@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 160" font-family="Barlow, Arial, sans-serif" role="img">
+<title>IMD heatwave classification scale</title>
+<g font-size="15" fill="#fff" font-weight="600">
+<rect x="0" y="20" width="180" height="56" fill="#4E8C6A"/><text x="14" y="54">Normal</text>
+<rect x="180" y="20" width="180" height="56" fill="#D9A21B"/><text x="194" y="54">Heat watch</text>
+<rect x="360" y="20" width="180" height="56" fill="#DB6B24"/><text x="374" y="54">Heatwave</text>
+<rect x="540" y="20" width="180" height="56" fill="#B5341F"/><text x="554" y="54">Severe heatwave</text>
+</g>
+<g font-size="13" fill="#241C17">
+<text x="14" y="102">departure below 3.0°C</text><text x="194" y="102">3.0 to 4.4°C</text>
+<text x="374" y="102">4.5 to 6.4°C</text><text x="554" y="102">6.5°C or more</text>
+<text x="0" y="132" fill="#63584F">Applies once the maximum passes 40°C (plains), 37°C (coast) or 30°C (hills).</text>
+<text x="0" y="152" fill="#63584F">A maximum of 45°C is a heatwave and 47°C a severe heatwave, whatever the departure.</text>
+</g></svg>
