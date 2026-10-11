@@ -128,7 +128,7 @@ tbody tr:hover { background: var(--surface); }
 }
 .day-date { font-family: "Barlow Condensed", sans-serif; font-weight: 600; }
 .day-track { background: var(--surface); height: 22px; border-radius: 2px; overflow: hidden; }
-.day-fill { height: 100%; border-radius: 2px; }
+.day-fill { display: block; height: 100%; border-radius: 2px; }
 .day-temp { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 .day-prob { text-align: right; color: var(--ink-soft); font-size: .88rem; font-variant-numeric: tabular-nums; }
 
