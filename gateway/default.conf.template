@@ -1,0 +1,75 @@
+# Tapmaan API gateway.
+#
+# Serves the static frontend and routes each /api/* path to the microservice
+# that owns it. Upstreams are resolved at request time (through a variable), so
+# the gateway starts and keeps serving even when one service is down — that
+# service's routes return a JSON 503 and everything else keeps working.
+#
+# ${NGINX_LOCAL_RESOLVERS} is filled in by the nginx image from
+# /etc/resolv.conf. ${SERVICE_SUFFIX} is empty under Docker Compose and set to
+# ".<namespace>.svc.cluster.local" on Kubernetes, because nginx's resolver does
+# not apply DNS search domains.
+
+resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+
+log_format tapmaan '$remote_addr "$request" $status $body_bytes_sent '
+                   'upstream=$svc rt=$request_time urt=$upstream_response_time';
+
+server {
+    listen 80;
+    server_name _;
+    access_log /var/log/nginx/access.log tapmaan;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    set $svc "";
+
+    # --- gateway's own probe -------------------------------------------------
+    location = /health {
+        default_type application/json;
+        return 200 '{"status":"up","service":"gateway"}';
+    }
+
+    # --- API routing: one location per owning service -----------------------
+    location = /api/observations { set $svc monitoring-service; set $port 4001; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+    location = /api/forecast     { set $svc forecast-service;   set $port 4002; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+    location = /api/hotspots     { set $svc hotspot-service;    set $port 4003; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+    location = /api/advisory     { set $svc advisory-service;   set $port 4004; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+    location = /api/alerts       { set $svc alert-service;      set $port 4005; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+    location = /api/subscribe    { set $svc alert-service;      set $port 4005; proxy_pass http://$svc${SERVICE_SUFFIX}:$port; }
+
+    # Anything else under /api, including the data-service's /internal routes,
+    # is deliberately not reachable from outside.
+    location /api/ {
+        default_type application/json;
+        return 404 '{"ok":false,"error":"No such API route."}';
+    }
+
+    # Shared proxy behaviour for every API location above.
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Request-Id $request_id;
+    proxy_connect_timeout 3s;
+    proxy_read_timeout 20s;
+    # Applies only when nginx itself cannot reach the service (connection
+    # refused, DNS miss, timeout). A service's own error responses pass through.
+    error_page 502 503 504 = @unavailable;
+
+    location @unavailable {
+        default_type application/json;
+        add_header Retry-After 10 always;
+        return 503 '{"ok":false,"error":"$svc is temporarily unavailable. The rest of Tapmaan is still running."}';
+    }
+
+    # --- frontend --------------------------------------------------------------
+    location /assets/ {
+        expires 1h;
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+}

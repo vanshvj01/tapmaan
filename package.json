@@ -6,6 +6,10 @@
   "engines": { "node": ">=18" },
   "scripts": {
     "dev": "vercel dev",
-    "test": "node test/logic.test.js"
+    "test": "node test/logic.test.js",
+    "services": "sh scripts/run-local.sh",
+    "stack:up": "docker compose up --build -d --wait",
+    "stack:down": "docker compose down",
+    "smoke": "sh scripts/smoke-test.sh"
   }
 }

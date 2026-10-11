@@ -1,0 +1,19 @@
+# kubectl apply -k k8s/
+#
+# Images default to the locally built tapmaan/<service>:latest (minikube).
+# To run the images published by CI instead:
+#   cd k8s && kustomize edit set image tapmaan/forecast-service=ghcr.io/vanshvj01/tapmaan-forecast-service:latest
+#   (repeat per service), and set imagePullPolicy to Always.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tapmaan
+resources:
+  - 00-namespace.yaml
+  - data-service.yaml
+  - monitoring-service.yaml
+  - forecast-service.yaml
+  - hotspot-service.yaml
+  - advisory-service.yaml
+  - alert-service.yaml
+  - gateway.yaml
+  - hpa.yaml

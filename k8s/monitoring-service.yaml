@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-service
+  namespace: tapmaan
+  labels: { app: monitoring-service, part-of: tapmaan }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: monitoring-service }
+  template:
+    metadata:
+      labels: { app: monitoring-service, part-of: tapmaan }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4001"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: monitoring-service
+          image: tapmaan/monitoring-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 4001 }]
+          env:
+            - name: PORT
+              value: "4001"
+            - name: APP_VERSION
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: APP_VERSION } }
+            - name: DATA_SERVICE_URL
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: DATA_SERVICE_URL } }
+          readinessProbe:
+            httpGet: { path: /health, port: 4001 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 4001 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-service
+  namespace: tapmaan
+spec:
+  selector: { app: monitoring-service }
+  ports: [{ port: 4001, targetPort: 4001 }]

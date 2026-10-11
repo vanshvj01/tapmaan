@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotspot-service
+  namespace: tapmaan
+  labels: { app: hotspot-service, part-of: tapmaan }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: hotspot-service }
+  template:
+    metadata:
+      labels: { app: hotspot-service, part-of: tapmaan }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4003"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: hotspot-service
+          image: tapmaan/hotspot-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 4003 }]
+          env:
+            - name: PORT
+              value: "4003"
+            - name: APP_VERSION
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: APP_VERSION } }
+            - name: DATA_SERVICE_URL
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: DATA_SERVICE_URL } }
+          readinessProbe:
+            httpGet: { path: /health, port: 4003 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 4003 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotspot-service
+  namespace: tapmaan
+spec:
+  selector: { app: hotspot-service }
+  ports: [{ port: 4003, targetPort: 4003 }]

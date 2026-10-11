@@ -1,0 +1,9 @@
+node_modules
+.git
+.github
+.vercel
+k8s
+docs
+monitoring
+*.md
+!README.md

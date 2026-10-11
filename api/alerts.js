@@ -68,6 +68,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error('[alerts]', err);
-    return fail(res, 500, 'Could not load the alert queue. Try again shortly.');
+    return fail(res, err.status || 500, err.status ? err.message : 'Could not load the alert queue. Try again shortly.');
   }
 };

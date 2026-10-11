@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tapmaan
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tapmaan-config
+  namespace: tapmaan
+data:
+  DATA_SERVICE_URL: http://data-service:4000
+  APP_VERSION: k8s

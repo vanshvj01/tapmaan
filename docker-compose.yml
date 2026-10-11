@@ -1,0 +1,92 @@
+# Tapmaan — microservice stack.
+#
+#   docker compose up --build -d                       app on http://localhost:8080
+#   docker compose --profile monitoring up --build -d  + Prometheus :9090, Grafana :3001
+#
+# Services talk to each other on the private "tapmaan" network by service name.
+# Only the gateway (and the optional monitoring tools) publish ports.
+
+x-service: &service
+  restart: unless-stopped
+  networks: [tapmaan]
+  environment: &service-env
+    APP_VERSION: ${APP_VERSION:-local}
+    DATA_SERVICE_URL: http://data-service:4000
+  depends_on:
+    data-service:
+      condition: service_healthy
+
+services:
+  data-service:
+    build: { context: ., dockerfile: services/data-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/data-service:${TAG:-latest}
+    restart: unless-stopped
+    networks: [tapmaan]
+    environment:
+      APP_VERSION: ${APP_VERSION:-local}
+
+  monitoring-service:
+    <<: *service
+    build: { context: ., dockerfile: services/monitoring-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/monitoring-service:${TAG:-latest}
+
+  forecast-service:
+    <<: *service
+    build: { context: ., dockerfile: services/forecast-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/forecast-service:${TAG:-latest}
+
+  hotspot-service:
+    <<: *service
+    build: { context: ., dockerfile: services/hotspot-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/hotspot-service:${TAG:-latest}
+
+  advisory-service:
+    <<: *service
+    build: { context: ., dockerfile: services/advisory-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/advisory-service:${TAG:-latest}
+    environment:
+      <<: *service-env
+      # Optional: LLM-drafted advisories. Unset = rule-based template.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+  alert-service:
+    <<: *service
+    build: { context: ., dockerfile: services/alert-service/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/alert-service:${TAG:-latest}
+
+  gateway:
+    build: { context: ., dockerfile: gateway/Dockerfile }
+    image: ${REGISTRY:-tapmaan}/gateway:${TAG:-latest}
+    restart: unless-stopped
+    networks: [tapmaan]
+    ports: ["${GATEWAY_PORT:-8080}:80"]
+    # No depends_on: the gateway resolves services per request, so it comes up
+    # independently and reports a JSON 503 for any service that is down.
+
+  # ---- optional monitoring (docker compose --profile monitoring up) ---------
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: [monitoring]
+    networks: [tapmaan]
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    profiles: [monitoring]
+    networks: [tapmaan]
+    ports: ["3001:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-tapmaan}
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+
+networks:
+  tapmaan:
+    name: tapmaan

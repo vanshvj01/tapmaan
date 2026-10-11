@@ -148,4 +148,12 @@ function withHeatIndex(series) {
   return series.map(d => ({ ...d, heatIndex: heatIndex(d.maxTemp, d.humidity) }));
 }
 
-module.exports = { fetchStation, fetchAll, withHeatIndex, scenarioFrom };
+const local = { fetchStation, fetchAll, withHeatIndex, scenarioFrom, remote: false };
+
+// Microservice mode: when DATA_SERVICE_URL is set (every domain service except
+// the data-service itself), station data is fetched over HTTP from the
+// data-service instead of directly from Open-Meteo. On Vercel the variable is
+// unset and behaviour is exactly as before.
+module.exports = process.env.DATA_SERVICE_URL
+  ? { ...local, ...require('./remote-provider') }
+  : local;

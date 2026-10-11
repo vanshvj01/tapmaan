@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forecast-service
+  namespace: tapmaan
+  labels: { app: forecast-service, part-of: tapmaan }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: forecast-service }
+  template:
+    metadata:
+      labels: { app: forecast-service, part-of: tapmaan }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4002"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: forecast-service
+          image: tapmaan/forecast-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 4002 }]
+          env:
+            - name: PORT
+              value: "4002"
+            - name: APP_VERSION
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: APP_VERSION } }
+            - name: DATA_SERVICE_URL
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: DATA_SERVICE_URL } }
+          readinessProbe:
+            httpGet: { path: /health, port: 4002 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 4002 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forecast-service
+  namespace: tapmaan
+spec:
+  selector: { app: forecast-service }
+  ports: [{ port: 4002, targetPort: 4002 }]
