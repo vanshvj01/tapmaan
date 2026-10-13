@@ -4,7 +4,9 @@
 #   2. integration  build all images, start the stack with Docker Compose,
 #                   smoke test every route through the gateway, then stop one
 #                   service and prove the others keep working
-#   3. publish      on main only: push one image per service to GitHub
+#   3. kubernetes   deploy to a throwaway kind cluster, smoke test via the
+#                   gateway Service, delete a pod and check it recovers
+#   4. publish      on main only: push one image per service to GitHub
 #                   Container Registry (ghcr.io), tagged with the commit SHA
 #                   and "latest". Uses the built-in GITHUB_TOKEN; no secrets.
 #
@@ -75,9 +77,56 @@ jobs:
         if: always()
         run: docker compose down -v
 
+  kubernetes:
+    name: Kubernetes (kind cluster)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create a local Kubernetes cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: tapmaan
+
+      - name: Build images and load them into the cluster
+        run: |
+          docker compose build
+          for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
+            kind load docker-image tapmaan/$s:latest --name tapmaan
+          done
+
+      - name: Deploy with kubectl apply -k
+        run: |
+          kubectl apply -k k8s/
+          kubectl -n tapmaan wait --for=condition=available deployment --all --timeout=180s
+          kubectl -n tapmaan get pods -o wide
+
+      - name: Smoke test through the gateway Service
+        run: |
+          kubectl -n tapmaan port-forward svc/gateway 8080:80 > /tmp/pf.log 2>&1 &
+          sleep 5
+          ./scripts/smoke-test.sh http://localhost:8080
+
+      - name: Self-healing — delete a forecast pod
+        run: |
+          kubectl -n tapmaan delete pod -l app=forecast-service --wait=false
+          sleep 3
+          kubectl -n tapmaan get pods -l app=forecast-service
+          kubectl -n tapmaan wait --for=condition=available deployment/forecast-service --timeout=120s
+          curl -sf "http://localhost:8080/api/forecast?station=nagpur&demo=1" | grep -q '"ok":true'
+          echo "forecast-service recovered."
+
+      - name: Diagnostics
+        if: always()
+        run: |
+          kubectl -n tapmaan get all
+          kubectl -n tapmaan describe pods | tail -60
+          kubectl -n tapmaan logs deploy/gateway --tail=30 || true
+
   publish:
     name: Publish images
-    needs: integration
+    needs: [integration, kubernetes]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
