@@ -90,23 +90,36 @@ jobs:
           cluster_name: tapmaan
 
       - name: Build images and load them into the cluster
+        env:
+          # Plain single-platform images: kind's loader cannot import the
+          # attestation manifests BuildKit attaches by default.
+          BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         run: |
           docker compose build
           for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
-            kind load docker-image tapmaan/$s:latest --name tapmaan
+            docker save "tapmaan/$s:latest" -o "/tmp/$s.tar"
+            if ! kind load image-archive "/tmp/$s.tar" --name tapmaan > /tmp/load.log 2>&1; then
+              echo "::error title=kind load failed for $s::$(tail -c 600 /tmp/load.log | tr '\n' ' ')"
+              exit 1
+            fi
+            echo "loaded $s"
           done
 
       - name: Deploy with kubectl apply -k
         run: |
           kubectl apply -k k8s/
-          kubectl -n tapmaan wait --for=condition=available deployment --all --timeout=180s
+          if ! kubectl -n tapmaan wait --for=condition=available deployment --all --timeout=180s; then
+            echo "::error title=Deployments not ready::$(kubectl -n tapmaan get pods --no-headers | tr '\n' ';')"
+            exit 1
+          fi
           kubectl -n tapmaan get pods -o wide
 
       - name: Smoke test through the gateway Service
         run: |
           kubectl -n tapmaan port-forward svc/gateway 8080:80 > /tmp/pf.log 2>&1 &
           sleep 5
-          ./scripts/smoke-test.sh http://localhost:8080
+          ./scripts/smoke-test.sh http://localhost:8080 | tee /tmp/smoke.log
+          if grep -q FAIL /tmp/smoke.log; then echo "::error title=Smoke test::$(grep FAIL /tmp/smoke.log | tr '\n' ';')"; exit 1; fi
 
       - name: Self-healing — delete a forecast pod
         run: |
