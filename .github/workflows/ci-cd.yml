@@ -95,13 +95,20 @@ jobs:
           # attestation manifests BuildKit attaches by default.
           BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         run: |
-          docker compose build
-          for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
-            docker save "tapmaan/$s:latest" -o "/tmp/$s.tar"
-            if ! kind load image-archive "/tmp/$s.tar" --name tapmaan > /tmp/load.log 2>&1; then
-              echo "::error title=kind load failed for $s::$(tail -c 600 /tmp/load.log | tr '\n' ' ')"
+          set +e
+          step() {   # run a command; on failure, surface its output as an annotation
+            "$@" > /tmp/step.log 2>&1
+            rc=$?
+            cat /tmp/step.log
+            if [ $rc -ne 0 ]; then
+              echo "::error title=Failed: $*::$(tail -c 900 /tmp/step.log | tr '\n' ' ')"
               exit 1
             fi
+          }
+          step docker compose build
+          for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
+            step docker save "tapmaan/$s:latest" -o "/tmp/$s.tar"
+            step kind load image-archive "/tmp/$s.tar" --name tapmaan
             echo "loaded $s"
           done
 
