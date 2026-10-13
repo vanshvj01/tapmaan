@@ -1,1 +1,2 @@
 .k8s-images/
+.k8s-port-forward.log

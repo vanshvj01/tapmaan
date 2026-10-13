@@ -4,6 +4,8 @@
 #
 #   bash scripts/setup-demo.sh            Docker Compose stack + monitoring
 #   bash scripts/setup-demo.sh --k8s      ...and the Kubernetes (minikube) part
+#   bash scripts/setup-demo.sh --reload   ...and re-copy images into minikube
+#                                         (after changing service code)
 #
 # Safe to run again: each step skips or refreshes what is already there.
 
@@ -16,8 +18,13 @@ ok()   { echo "${G}  ok${N}  $*"; }
 warn() { echo "${Y}  !!${N}  $*"; }
 die()  { echo "${R}  FAILED${N}  $*"; echo; echo "Fix the problem above and run this script again."; exit 1; }
 
-WANT_K8S=0
-[ "${1:-}" = "--k8s" ] && WANT_K8S=1
+WANT_K8S=0; RELOAD=0
+for arg in "$@"; do
+  case "$arg" in
+    --k8s)    WANT_K8S=1 ;;
+    --reload) WANT_K8S=1; RELOAD=1 ;;
+  esac
+done
 
 # --------------------------------------------------------------- checks
 step "Checking prerequisites"
@@ -56,53 +63,76 @@ sh scripts/smoke-test.sh http://localhost:${GATEWAY_PORT:-8080} || die "smoke te
 # --------------------------------------------------------------- kubernetes
 K8S_STATUS="skipped (run with --k8s to set it up)"
 if [ $WANT_K8S -eq 1 ]; then
-  step "Kubernetes: checking minikube and kubectl"
-  command -v minikube > /dev/null 2>&1 || die "minikube is not installed. Windows: winget install -e --id Kubernetes.minikube   Mac: brew install minikube   then open a NEW terminal and rerun."
-  ok "minikube found"
+  SERVICES="data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway"
+  K="minikube kubectl --"   # bundled kubectl: always the right version for the cluster
 
-  step "Kubernetes: starting minikube (first time: a few minutes)"
+  step "Kubernetes: checking minikube"
+  command -v minikube > /dev/null 2>&1 || die "minikube is not installed. Windows: winget install -e --id Kubernetes.minikube   Mac: brew install minikube   then open a NEW terminal and rerun."
+  ok "minikube found ($(minikube version --short 2>/dev/null))"
+
+  step "Kubernetes: starting the cluster (first time: a few minutes)"
   if minikube status --format '{{.Host}}' 2>/dev/null | grep -q Running; then
     ok "minikube already running"
   else
-    minikube start --driver=docker --memory=4096 --cpus=2 || die "minikube did not start. In Docker Desktop give it at least 6 GB memory (Settings > Resources), then: minikube delete   and rerun."
+    minikube start --driver=docker --memory=4096 --cpus=2 \
+      || die "minikube did not start. In Docker Desktop give it at least 6 GB memory (Settings > Resources), then run: minikube delete   and rerun this script."
   fi
+
+  # Make sure kubectl's config knows this cluster. A stale or missing entry
+  # shows up as 'cluster "minikube" does not exist'; update-context rewrites it.
+  minikube update-context > /dev/null 2>&1
+  if ! $K get nodes > /dev/null 2>&1; then
+    warn "cluster config was stale; restarting minikube to rewrite it"
+    minikube stop > /dev/null 2>&1
+    minikube start --driver=docker --memory=4096 --cpus=2 || die "minikube did not restart. Run: minikube delete   and rerun this script."
+    minikube update-context > /dev/null 2>&1
+    $K get nodes > /dev/null 2>&1 || die "kubectl still cannot reach minikube. Run: minikube delete   and rerun this script (it recreates the cluster cleanly)."
+  fi
+  ok "kubectl can reach the cluster"
   minikube addons enable metrics-server > /dev/null 2>&1 && ok "metrics-server enabled (for the autoscaler)"
 
-  step "Kubernetes: copying the 7 images into minikube (a few minutes)"
-  # Build in Docker Desktop, then load into minikube. Works whichever container
-  # runtime minikube uses (docker or containerd); docker-env only works with docker.
-  # Attestations are switched off because minikube's loader cannot import them.
-  mkdir -p .k8s-images
-  REGISTRY=tapmaan TAG=latest BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose build -q \
-    || die "image build failed"
-  for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
-    docker save "tapmaan/$s:latest" -o ".k8s-images/$s.tar" || die "could not export $s"
-    minikube image load ".k8s-images/$s.tar" || die "could not load $s into minikube"
-    ok "$s"
-  done
-  rm -rf .k8s-images
+  step "Kubernetes: copying the 7 images into minikube"
+  LOADED=$(minikube image ls 2>/dev/null)
+  MISSING=0
+  for s in $SERVICES; do echo "$LOADED" | grep -q "tapmaan/$s:latest" || MISSING=1; done
+  if [ $MISSING -eq 0 ] && [ "$RELOAD" -eq 0 ]; then
+    ok "all images already in minikube (use --reload after changing code)"
+  else
+    # Build in Docker Desktop, then load. Works with either minikube runtime;
+    # attestations are off because minikube's loader cannot import them.
+    mkdir -p .k8s-images
+    REGISTRY=tapmaan TAG=latest BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose build -q || die "image build failed"
+    for s in $SERVICES; do
+      docker save "tapmaan/$s:latest" -o ".k8s-images/$s.tar" || die "could not export $s"
+      minikube image load ".k8s-images/$s.tar" || die "could not load $s into minikube"
+      ok "$s"
+    done
+    rm -rf .k8s-images
+  fi
 
   step "Kubernetes: deploying"
-  # minikube's bundled kubectl always matches the cluster version and context.
-  # A separately installed kubectl (or Docker Desktop's) can be older or point
-  # elsewhere, which shows up as "failed to download openapi".
-  K="minikube kubectl --"
-  $K config use-context minikube > /dev/null 2>&1
   $K apply -k k8s/ || die "kubectl apply failed"
-  $K -n tapmaan rollout restart deployment > /dev/null   # pick up freshly loaded images
+  $K -n tapmaan rollout restart deployment > /dev/null
   $K -n tapmaan wait --for=condition=available deployment --all --timeout=240s \
-    || die "deployments not ready. Check: minikube kubectl -- get pods -n tapmaan"
+    || die "deployments not ready. See: minikube kubectl -- get pods -n tapmaan"
   $K get pods -n tapmaan
 
-  # Plain "kubectl" is what the demo script uses. Check it works; if not, say how.
+  step "Kubernetes: opening the gateway on http://localhost:8081"
+  pkill -f "port-forward svc/gateway" > /dev/null 2>&1
+  nohup minikube kubectl -- -n tapmaan port-forward svc/gateway 8081:80 > .k8s-port-forward.log 2>&1 &
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    curl -s -o /dev/null http://localhost:8081/health && break
+    sleep 2
+  done
+  sh scripts/smoke-test.sh http://localhost:8081 || die "Kubernetes copy is not answering on 8081. See .k8s-port-forward.log"
+
+  # The demo script types plain "kubectl". Check it works; if not, say how.
   if kubectl get ns tapmaan > /dev/null 2>&1; then
     ok "plain kubectl works against minikube"
-    KUBECTL_NOTE=""
   else
-    warn "your kubectl command can't talk to minikube (version or path mismatch)."
-    KUBECTL_NOTE="  Before the demo, run once per Git Bash window:  alias kubectl=\"minikube kubectl --\""
+    KUBECTL_NOTE="  ${Y}Note:${N} your kubectl command can't reach minikube. In each Git Bash window, first run:  alias kubectl=\"minikube kubectl --\""
   fi
-  K8S_STATUS="running — open a second Git Bash and run:  minikube kubectl -- -n tapmaan port-forward svc/gateway 8081:80   then visit http://localhost:8081"
+  K8S_STATUS="http://localhost:8081   (same app, served from Kubernetes)"
 fi
 
 # --------------------------------------------------------------- summary
