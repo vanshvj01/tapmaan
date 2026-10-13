@@ -94,6 +94,8 @@ jobs:
           # Plain single-platform images: kind's loader cannot import the
           # attestation manifests BuildKit attaches by default.
           BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
+          # Match the image names in k8s/ (the workflow-level REGISTRY is for publishing).
+          REGISTRY: tapmaan
         run: |
           set +e
           step() {   # run a command; on failure, surface its output as an annotation
