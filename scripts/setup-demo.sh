@@ -69,11 +69,19 @@ if [ $WANT_K8S -eq 1 ]; then
   fi
   minikube addons enable metrics-server > /dev/null 2>&1 && ok "metrics-server enabled (for the autoscaler)"
 
-  step "Kubernetes: building images inside minikube"
-  eval "$(minikube -p minikube docker-env --shell bash)" || die "could not point Docker at minikube"
-  docker compose build || die "image build inside minikube failed"
-  eval "$(minikube -p minikube docker-env --shell bash --unset)"
-  ok "images available to the cluster"
+  step "Kubernetes: copying the 7 images into minikube (a few minutes)"
+  # Build in Docker Desktop, then load into minikube. Works whichever container
+  # runtime minikube uses (docker or containerd); docker-env only works with docker.
+  # Attestations are switched off because minikube's loader cannot import them.
+  mkdir -p .k8s-images
+  REGISTRY=tapmaan TAG=latest BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose build -q \
+    || die "image build failed"
+  for s in data-service monitoring-service forecast-service hotspot-service advisory-service alert-service gateway; do
+    docker save "tapmaan/$s:latest" -o ".k8s-images/$s.tar" || die "could not export $s"
+    minikube image load ".k8s-images/$s.tar" || die "could not load $s into minikube"
+    ok "$s"
+  done
+  rm -rf .k8s-images
 
   step "Kubernetes: deploying"
   kubectl apply -k k8s/ || die "kubectl apply failed"
