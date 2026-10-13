@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-service
+  namespace: tapmaan
+  labels: { app: alert-service, part-of: tapmaan }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: alert-service }
+  template:
+    metadata:
+      labels: { app: alert-service, part-of: tapmaan }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4005"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: alert-service
+          image: tapmaan/alert-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 4005 }]
+          env:
+            - name: PORT
+              value: "4005"
+            - name: APP_VERSION
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: APP_VERSION } }
+            - name: DATA_SERVICE_URL
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: DATA_SERVICE_URL } }
+          readinessProbe:
+            httpGet: { path: /health, port: 4005 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 4005 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-service
+  namespace: tapmaan
+spec:
+  selector: { app: alert-service }
+  ports: [{ port: 4005, targetPort: 4005 }]

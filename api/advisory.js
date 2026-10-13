@@ -223,6 +223,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error('[advisory]', err);
-    return fail(res, 500, 'Could not generate the advisory. Try again shortly.');
+    return fail(res, err.status || 500, err.status ? err.message : 'Could not generate the advisory. Try again shortly.');
   }
 };

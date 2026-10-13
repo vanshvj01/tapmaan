@@ -30,6 +30,45 @@ public/              frontend, one page per capability
 test/logic.test.js   15 checks over the domain logic
 ```
 
+## Running as microservices
+
+The same handlers also run as seven independently deployable services behind
+an nginx gateway, with Docker, GitHub Actions CI/CD, Kubernetes manifests and
+Prometheus/Grafana monitoring. Full design in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); demo walkthrough in
+[docs/DEMO.md](docs/DEMO.md).
+
+| Service | Port | Routes |
+|---|---|---|
+| gateway | 8080 | frontend, `/api/*` |
+| data-service | 4000 | internal only — Open-Meteo, cache, fallback |
+| monitoring-service | 4001 | `/api/observations` |
+| forecast-service | 4002 | `/api/forecast` |
+| hotspot-service | 4003 | `/api/hotspots` |
+| advisory-service | 4004 | `/api/advisory` |
+| alert-service | 4005 | `/api/alerts`, `/api/subscribe` |
+
+```bash
+docker compose up --build -d --wait          # http://localhost:8080
+./scripts/smoke-test.sh                      # checks every route via the gateway
+docker compose stop hotspot-service          # only /api/hotspots goes 503
+docker compose --profile monitoring up -d    # Prometheus :9090, Grafana :3001
+kubectl apply -k k8s/                        # Kubernetes (minikube), NodePort 30080
+npm run services                             # all services as Node processes, no Docker
+```
+
+```
+services/
+  shared/runtime.js     http server, /health, /metrics, graceful shutdown
+  data-service/         Data Acquisition Layer
+  monitoring-service/   forecast-service/   hotspot-service/
+  advisory-service/     alert-service/
+gateway/                nginx config + Dockerfile (serves public/)
+k8s/                    Deployments, Services, HPA, Kustomize
+monitoring/             Prometheus config, alert rules, Grafana dashboard
+.github/workflows/      CI/CD: test → integration → publish to ghcr.io
+```
+
 ## Running locally
 
 ```bash

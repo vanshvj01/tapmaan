@@ -1,0 +1,7 @@
+# Keep Unix line endings on files that run inside Linux or bash, even when the
+# repository is cloned on Windows with core.autocrlf=true.
+*.sh        text eol=lf
+*.template  text eol=lf
+Dockerfile  text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf

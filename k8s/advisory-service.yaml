@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: advisory-service
+  namespace: tapmaan
+  labels: { app: advisory-service, part-of: tapmaan }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: advisory-service }
+  template:
+    metadata:
+      labels: { app: advisory-service, part-of: tapmaan }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4004"
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: advisory-service
+          image: tapmaan/advisory-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 4004 }]
+          env:
+            - name: PORT
+              value: "4004"
+            - name: APP_VERSION
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: APP_VERSION } }
+            - name: DATA_SERVICE_URL
+              valueFrom: { configMapKeyRef: { name: tapmaan-config, key: DATA_SERVICE_URL } }
+            - name: ANTHROPIC_API_KEY
+              valueFrom: { secretKeyRef: { name: tapmaan-secrets, key: ANTHROPIC_API_KEY, optional: true } }
+          readinessProbe:
+            httpGet: { path: /health, port: 4004 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 4004 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: advisory-service
+  namespace: tapmaan
+spec:
+  selector: { app: advisory-service }
+  ports: [{ port: 4004, targetPort: 4004 }]

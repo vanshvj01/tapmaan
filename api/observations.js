@@ -94,6 +94,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error('[observations]', err);
-    return fail(res, 500, 'Could not assemble observations. Try again shortly.');
+    return fail(res, err.status || 500, err.status ? err.message : 'Could not assemble observations. Try again shortly.');
   }
 };
