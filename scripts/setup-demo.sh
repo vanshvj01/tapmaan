@@ -58,8 +58,7 @@ K8S_STATUS="skipped (run with --k8s to set it up)"
 if [ $WANT_K8S -eq 1 ]; then
   step "Kubernetes: checking minikube and kubectl"
   command -v minikube > /dev/null 2>&1 || die "minikube is not installed. Windows: winget install -e --id Kubernetes.minikube   Mac: brew install minikube   then open a NEW terminal and rerun."
-  command -v kubectl  > /dev/null 2>&1 || die "kubectl is not installed. Windows: winget install -e --id Kubernetes.kubectl   Mac: brew install kubectl"
-  ok "minikube and kubectl found"
+  ok "minikube found"
 
   step "Kubernetes: starting minikube (first time: a few minutes)"
   if minikube status --format '{{.Host}}' 2>/dev/null | grep -q Running; then
@@ -84,12 +83,26 @@ if [ $WANT_K8S -eq 1 ]; then
   rm -rf .k8s-images
 
   step "Kubernetes: deploying"
-  kubectl apply -k k8s/ || die "kubectl apply failed"
-  kubectl -n tapmaan rollout restart deployment > /dev/null   # pick up freshly built images
-  kubectl -n tapmaan wait --for=condition=available deployment --all --timeout=240s \
-    || die "deployments not ready. Check: kubectl get pods -n tapmaan"
-  kubectl get pods -n tapmaan
-  K8S_STATUS="running — open a second Git Bash and run:  kubectl -n tapmaan port-forward svc/gateway 8081:80   then visit http://localhost:8081"
+  # minikube's bundled kubectl always matches the cluster version and context.
+  # A separately installed kubectl (or Docker Desktop's) can be older or point
+  # elsewhere, which shows up as "failed to download openapi".
+  K="minikube kubectl --"
+  $K config use-context minikube > /dev/null 2>&1
+  $K apply -k k8s/ || die "kubectl apply failed"
+  $K -n tapmaan rollout restart deployment > /dev/null   # pick up freshly loaded images
+  $K -n tapmaan wait --for=condition=available deployment --all --timeout=240s \
+    || die "deployments not ready. Check: minikube kubectl -- get pods -n tapmaan"
+  $K get pods -n tapmaan
+
+  # Plain "kubectl" is what the demo script uses. Check it works; if not, say how.
+  if kubectl get ns tapmaan > /dev/null 2>&1; then
+    ok "plain kubectl works against minikube"
+    KUBECTL_NOTE=""
+  else
+    warn "your kubectl command can't talk to minikube (version or path mismatch)."
+    KUBECTL_NOTE="  Before the demo, run once per Git Bash window:  alias kubectl=\"minikube kubectl --\""
+  fi
+  K8S_STATUS="running — open a second Git Bash and run:  minikube kubectl -- -n tapmaan port-forward svc/gateway 8081:80   then visit http://localhost:8081"
 fi
 
 # --------------------------------------------------------------- summary
@@ -103,6 +116,7 @@ echo "  Hotspots     http://localhost:$P/hotspots.html?demo=1"
 echo "  Grafana      http://localhost:3001   (Dashboards > Tapmaan)"
 echo "  Prometheus   http://localhost:9090"
 echo "  Kubernetes   $K8S_STATUS"
+[ -n "${KUBECTL_NOTE:-}" ] && echo "$KUBECTL_NOTE"
 echo
 echo "  Stop everything:   docker compose --profile monitoring down"
 echo
