@@ -112,6 +112,8 @@ Example request path for `GET /api/forecast?station=nagpur`:
                ├─ integration  docker compose up --build --wait
                │               smoke test all routes through the gateway
                │               stop hotspot-service → assert 503 there, 200 elsewhere
+               ├─ kubernetes   deploy k8s/ to a throwaway kind cluster, smoke test
+               │               through the gateway Service, delete a pod → recovers
                └─ publish      (main only) 7 images → ghcr.io/vanshvj01/tapmaan-<service>
                                tagged :<commit-sha> and :latest
 ```
@@ -122,7 +124,7 @@ Example request path for `GET /api/forecast?station=nagpur`:
 | CI/CD | GitHub Actions | `.github/workflows/ci-cd.yml` |
 | Containerisation | Docker (one Dockerfile per service) | `services/*/Dockerfile`, `gateway/Dockerfile` |
 | Local orchestration | Docker Compose | `docker-compose.yml` |
-| Cluster orchestration | Kubernetes (minikube), Kustomize, HPA | `k8s/` |
+| Cluster orchestration | Kubernetes (minikube locally, kind in CI), Kustomize, HPA | `k8s/` |
 | Registry | GitHub Container Registry | (pushed by CI) |
 | Monitoring | Prometheus, Grafana | `monitoring/` |
 | Logging | Structured JSON request logs per service; nginx log names the upstream | `docker compose logs` |
